@@ -1,5 +1,5 @@
 <template>
-  <div class="mx-auto lg:container dark:bg-gray-800 h-screen w-screen">
+  <div class="dark:bg-gray-800 h-screen w-screen">
 
     <!-- First screen -->
     <div class="w-screen py-20" :class="!shouldDisplay ? '' : 'hidden'">
@@ -22,23 +22,65 @@
           </svg>          
         </span>
         <span>Browse Image</span>
-        </div>
+      </div>
     </div>
 
     <!-- Second screen -->
     <div
-      class=""
-      :class="shouldDisplay ? '' : 'hidden'"
+      class="mx-auto"
+      :class="shouldDisplay ? '' : 'hidden'" :style="'width:'+width+'px;'"
     >
-      <div class="flex flex-nowrap space-x-4 place-content-between px-4 py-4">
-        <div class="bg-red-600 text-white text-sm rounded-lg p-2">Close</div>
-        <div class="bg-yellow-500 text-white text-sm rounded-lg p-2" @click="$refs.browseFile.chooseFile()">change</div>
-        <div class="bg-green-400  text-white text-sm rounded-lg p-2">save</div>
+      <div class="flex flex-nowrap space-x-2 place-content-between px-0 py-4">
+
+        <div class="flex flex-nowrap bg-red-600 px-2 py-2 text-white rounded" @click="shouldDisplay=false;$refs.browseFile.refresh()">
+          <span>
+            <fa-icon icon="power-off" class="mr-2"></fa-icon>
+          </span>
+          <span>Close</span>
+        </div>
+        <div class="flex flex-nowrap bg-yellow-500 px-2 py-2 text-white rounded" @click="$refs.browseFile.chooseFile()">
+          <span>
+            <fa-icon icon="sync" class="mr-2"></fa-icon>
+          </span>
+          <span>Change</span>
+        </div>
+        <div class="flex flex-nowrap bg-green-400 px-2 py-2 text-white rounded">
+          <span>
+            <fa-icon icon="save" class="mr-2"></fa-icon>
+          </span>
+          <span>Save</span>
+        </div>
       </div>
       <div class="imageEditorApp mx-auto">
         <client-only>
-          <croppa class="mx-auto" :width="width" :height="height" :accept="'image/*'" :show-remove-button="false" v-model="myCroppa" @file-choose="selectImage" ref="browseFile"></croppa>
+          <croppa class="mx-auto" 
+            :prevent-white-space="false" 
+            :width="width" 
+            :height="height" 
+            :accept="'image/*'" 
+            :show-remove-button="false" 
+            v-model="myCroppa"
+            :zoom-speed="10"
+            @file-choose="selectImage" 
+            ref="browseFile"></croppa>
         </client-only>
+      </div>
+      <div class="flex p-4 space-x-4" v-if="shouldDisplay">
+        <div class="rounded-full shadow text-center p-2 font-bold text-white bg-gray-900" @click="$refs.browseFile.rotate(-1)" style="width: 40px; height:40px;">
+          <fa-icon icon="undo" class=""></fa-icon>
+        </div>
+        <div class="rounded-full shadow text-center p-2 font-bold text-white bg-gray-900" @click="$refs.browseFile.rotate(1)" style="width: 40px; height:40px;">
+          <fa-icon icon="redo" class=""></fa-icon>
+        </div>
+        <div class="rounded-full shadow text-center p-2 font-bold text-white bg-gray-900" @click="$refs.browseFile.zoomOut()" style="width: 40px; height:40px;">
+          <fa-icon icon="search-minus" class=""></fa-icon>
+        </div>
+        <div class="rounded-full shadow text-center p-2 font-bold text-white bg-gray-900" @click="$refs.browseFile.refresh()" style="width: 40px; height:40px;">
+          <fa-icon icon="sync" class=""></fa-icon>
+        </div>
+        <div class="rounded-full shadow text-center p-2 font-bold text-white bg-gray-900" @click="$refs.browseFile.zoomIn()" style="width: 40px; height:40px;">
+          <fa-icon icon="search-plus" class=""></fa-icon>
+        </div>
       </div>
     </div>
   </div>
@@ -48,8 +90,8 @@ export default {
   data: function() {
     return {
       shouldDisplay: false,
-      height: 0,
-      width: 0,
+      height: 650,
+      width: 320,
       myCroppa:{}
     };
   },
@@ -58,12 +100,23 @@ export default {
       console.log("New image added.");
       this.shouldDisplay = true;
  
+    },
+
+    resizeWindow: function(){
+      if (window.innerWidth > 768) {
+        this.width = 600;
+        this.height = 750 
+      } else {
+        this.height = Math.round(window.innerHeight * 0.6) 
+        this.width = Math.round(window.innerWidth * 0.8)
+      }      
     }
   },
 
   mounted() {
-    this.height = Math.round(window.innerHeight * 0.6) 
-    this.width = Math.round(window.innerWidth * 0.8)
+
+    this.resizeWindow();
+    window.onresize = this.resizeWindow
   }
 };
 </script>
